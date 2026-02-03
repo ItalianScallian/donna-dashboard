@@ -47,36 +47,33 @@
   --font-mono: "JetBrains Mono", monospace;
 }
 
-@font-face {
-  font-family: "Syne";
-  font-style: normal;
-  font-weight: 400 800;
-  font-display: swap;
-  src: url("https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap");
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
-/* Noise texture overlay */
+/* ================================================
+   NOISE TEXTURE OVERLAY
+   ================================================ */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: 9999;
   pointer-events: none;
-  opacity: 0.025;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 256px 256px;
 }
 
-/* Selection color */
+/* ================================================
+   SELECTION COLOR
+   ================================================ */
 ::selection {
   background: rgba(200, 255, 0, 0.3);
   color: #fff;
@@ -87,7 +84,9 @@ body::before {
   color: #fff;
 }
 
-/* Custom scrollbar */
+/* ================================================
+   CUSTOM SCROLLBAR
+   ================================================ */
 ::-webkit-scrollbar {
   width: 4px;
 }
@@ -98,102 +97,259 @@ body::before {
 
 ::-webkit-scrollbar-thumb {
   background: #333;
-  border-radius: 2px;
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent);
 }
 
-/* Smooth scroll */
+/* ================================================
+   SMOOTH SCROLL
+   ================================================ */
 html {
   scroll-behavior: smooth;
 }
 
-/* Heading styles */
+/* ================================================
+   HEADINGS
+   ================================================ */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   letter-spacing: -0.02em;
 }
 
-/* Accent underline utility */
-.accent-line {
-  position: relative;
-}
-
-.accent-line::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  width: 40px;
-  height: 2px;
-  background: var(--accent);
-}
-
-/* Animated border gradient */
-@keyframes border-pulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.8; }
-}
-
-/* Grade colors */
-.grade-a-plus { color: #00ff88; text-shadow: 0 0 30px rgba(0, 255, 136, 0.5); }
-.grade-a { color: #66ff99; text-shadow: 0 0 30px rgba(102, 255, 153, 0.4); }
-.grade-b-plus { color: var(--accent); text-shadow: 0 0 30px rgba(200, 255, 0, 0.5); }
-.grade-b { color: #ffdd00; text-shadow: 0 0 30px rgba(255, 221, 0, 0.4); }
-.grade-c-plus { color: #ff8800; text-shadow: 0 0 30px rgba(255, 136, 0, 0.4); }
-.grade-c { color: #ff6600; text-shadow: 0 0 30px rgba(255, 102, 0, 0.4); }
-.grade-d { color: #ff4444; text-shadow: 0 0 30px rgba(255, 68, 68, 0.4); }
-.grade-f { color: #ff0000; text-shadow: 0 0 30px rgba(255, 0, 0, 0.5); }
-
-/* Diagonal section divider */
-.diagonal-divider {
-  position: relative;
-  overflow: hidden;
-}
-
-.diagonal-divider::before {
-  content: '';
-  position: absolute;
-  top: -50px;
-  left: -5%;
-  right: -5%;
-  height: 100px;
-  background: var(--background);
-  transform: rotate(-2deg);
-  z-index: 1;
-}
-
-/* Shimmer effect */
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-.shimmer {
-  position: relative;
-  overflow: hidden;
-}
-
-.shimmer::after {
-  content: '';
+/* ================================================
+   ANIMATED DOT GRID BACKGROUND
+   ================================================ */
+.dot-grid {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(200, 255, 0, 0.05) 50%,
-    transparent 100%
-  );
-  animation: shimmer 3s ease-in-out infinite;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 100%);
 }
 
-/* Recharts custom */
+.dot-grid::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background-image: radial-gradient(circle 1px at center, rgba(200, 255, 0, 0.15) 0%, transparent 100%);
+  background-size: 40px 40px;
+  animation: dot-drift 20s linear infinite;
+}
+
+@keyframes dot-drift {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(40px, 40px); }
+}
+
+/* ================================================
+   SCAN LINE EFFECT
+   ================================================ */
+.scan-line {
+  position: relative;
+  overflow: hidden;
+}
+
+.scan-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.4;
+  animation: scan-move 3s ease-in-out infinite;
+}
+
+@keyframes scan-move {
+  0% { top: 0; opacity: 0; }
+  10% { opacity: 0.4; }
+  90% { opacity: 0.4; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* ================================================
+   GRADE COLORS — DRAMATIC
+   ================================================ */
+.grade-a-plus { color: #00ff88; }
+.grade-a { color: #66ff99; }
+.grade-b-plus { color: var(--accent); }
+.grade-b { color: #ffdd00; }
+.grade-c-plus { color: #ff8800; }
+.grade-c { color: #ff6600; }
+.grade-d { color: #ff4444; }
+.grade-f { color: #ff0000; }
+
+/* ================================================
+   MARCHING ANTS BORDER (for dropzone)
+   ================================================ */
+@keyframes marching-ants {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -32; }
+}
+
+.marching-ants rect {
+  stroke-dasharray: 8 8;
+  animation: marching-ants 0.8s linear infinite;
+}
+
+/* ================================================
+   SHIMMER SWEEP
+   ================================================ */
+@keyframes shimmer-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+/* ================================================
+   CTA BORDER ANIMATION
+   ================================================ */
+@keyframes border-rotate {
+  0% { --angle: 0deg; }
+  100% { --angle: 360deg; }
+}
+
+/* ================================================
+   MATRIX-STYLE RAIN for processing
+   ================================================ */
+@keyframes data-fall {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
+/* ================================================
+   PULSE RING
+   ================================================ */
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+@keyframes pulse-ring-slow {
+  0% { transform: scale(1); opacity: 0.3; }
+  100% { transform: scale(3); opacity: 0; }
+}
+
+/* ================================================
+   SCREEN FLASH for grade reveal
+   ================================================ */
+@keyframes screen-flash {
+  0% { opacity: 0.7; }
+  100% { opacity: 0; }
+}
+
+/* ================================================
+   GRADE GLOW BREATHE
+   ================================================ */
+@keyframes glow-breathe {
+  0%, 100% { filter: drop-shadow(0 0 20px currentColor) drop-shadow(0 0 40px currentColor); }
+  50% { filter: drop-shadow(0 0 40px currentColor) drop-shadow(0 0 80px currentColor); }
+}
+
+/* ================================================
+   SLOT MACHINE CHARACTERS
+   ================================================ */
+@keyframes slot-blur {
+  0% { filter: blur(8px); transform: translateY(-4px); }
+  100% { filter: blur(0px); transform: translateY(0px); }
+}
+
+/* ================================================
+   HOLOGRAPHIC SHIMMER (for cards)
+   ================================================ */
+@keyframes holo-shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.holo-effect {
+  background: linear-gradient(
+    135deg,
+    rgba(200, 255, 0, 0) 0%,
+    rgba(200, 255, 0, 0.06) 25%,
+    rgba(0, 229, 255, 0.06) 50%,
+    rgba(200, 255, 0, 0.06) 75%,
+    rgba(200, 255, 0, 0) 100%
+  );
+  background-size: 200% 200%;
+  animation: holo-shimmer 3s ease infinite;
+}
+
+/* ================================================
+   FLOATING PARTICLES
+   ================================================ */
+@keyframes float-up {
+  0% { transform: translateY(0) scale(1); opacity: 0.6; }
+  100% { transform: translateY(-100vh) scale(0.3); opacity: 0; }
+}
+
+@keyframes float-particle {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(10px, -15px); }
+  50% { transform: translate(-5px, -25px); }
+  75% { transform: translate(8px, -10px); }
+}
+
+/* ================================================
+   BAR CHART ANIMATED FILL
+   ================================================ */
+@keyframes bar-fill {
+  0% { transform: scaleX(0); }
+  100% { transform: scaleX(1); }
+}
+
+/* ================================================
+   CONFETTI
+   ================================================ */
+@keyframes confetti-fall {
+  0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(200px) rotate(720deg); opacity: 0; }
+}
+
+/* ================================================
+   RECHARTS OVERRIDES
+   ================================================ */
 .recharts-cartesian-axis-tick-value {
   font-family: var(--font-body) !important;
 }
 
 .recharts-tooltip-wrapper {
   outline: none !important;
+}
+
+/* ================================================
+   CUSTOM FOCUS RING
+   ================================================ */
+*:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ================================================
+   LINK UNDERLINE ANIMATION
+   ================================================ */
+.hover-underline {
+  position: relative;
+}
+
+.hover-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.hover-underline:hover::after {
+  width: 100%;
 }
