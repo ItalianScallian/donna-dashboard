@@ -1,15 +1,16 @@
 import Papa from 'papaparse';
-import { Transaction } from '@/lib/types';
+import { Transaction, DetectedCard, ParsedCSVResult } from '@/lib/types';
+import { mapBankCategory, type BankFormat } from '@/lib/categorizer';
 
 interface RawRow {
   [key: string]: string;
 }
 
 // Column name patterns for different bank formats
-const DATE_COLUMNS = ['date', 'transaction date', 'trans date', 'post date', 'posting date', 'trans. date'];
+const DATE_COLUMNS = ['date', 'transaction date', 'trans date', 'post date', 'posting date', 'trans. date', 'posted date'];
 const DESC_COLUMNS = ['description', 'merchant', 'name', 'memo', 'payee', 'transaction description', 'merchant name'];
 const AMOUNT_COLUMNS = ['amount', 'debit', 'charge', 'transaction amount'];
-const CATEGORY_COLUMNS = ['category', 'type', 'transaction type', 'merchant category'];
+const CATEGORY_COLUMNS = ['category', 'merchant category'];
 
 function findColumn(headers: string[], patterns: string[]): string | null {
   const lowerHeaders = headers.map(h => h.toLowerCase().trim());
@@ -27,9 +28,7 @@ function findColumn(headers: string[], patterns: string[]): string | null {
 
 function parseAmount(value: string): number {
   if (!value) return 0;
-  // Remove currency symbols, spaces, parentheses
   let cleaned = value.replace(/[$,\s]/g, '');
-  // Handle parenthetical negative: (123.45) → -123.45
   if (cleaned.startsWith('(') && cleaned.endsWith(')')) {
     cleaned = '-' + cleaned.slice(1, -1);
   }
@@ -37,26 +36,85 @@ function parseAmount(value: string): number {
   return isNaN(num) ? 0 : num;
 }
 
-// Chase CSVs have Amount as negative for purchases
-// Amex uses positive for purchases
-// We normalize to positive = purchase
 function normalizeAmount(amount: number, format: string): number {
   if (format === 'chase' || format === 'citi') {
-    return amount < 0 ? Math.abs(amount) : -amount; // negative = purchase in Chase
+    return amount < 0 ? Math.abs(amount) : -amount;
   }
-  return amount; // Amex, Cap One: positive = purchase
+  return amount;
 }
 
-function detectBankFormat(headers: string[]): string {
-  const lower = headers.map(h => h.toLowerCase().trim()).join(',');
-  if (lower.includes('post date') && lower.includes('category')) return 'chase';
-  if (lower.includes('reference') && lower.includes('appears on your statement as')) return 'amex';
-  if (lower.includes('posted date') && lower.includes('card no')) return 'capital_one';
+export function detectBankFormat(headers: string[]): BankFormat {
+  const lower = headers.map(h => h.toLowerCase().trim());
+  const joined = lower.join(',');
+
+  // Capital One: has "Card No." column — most distinctive
+  if (lower.includes('card no.') && lower.includes('posted date')) return 'capital_one';
+
+  // Amex: has "Appears On Your Statement As" — unique to Amex
+  if (joined.includes('appears on your statement as')) return 'amex';
+
+  // Discover: uses "Trans. Date" specifically
+  if (lower.includes('trans. date') && lower.includes('post date') && lower.includes('category')) return 'discover';
+
+  // Bank of America: has "Reference Number" and "Payee"
+  if (lower.includes('reference number') && lower.includes('payee')) return 'boa';
+
+  // Citi: has "Status" column with "Debit"/"Credit" split
   if (lower.includes('status') && lower.includes('debit') && lower.includes('credit')) return 'citi';
+
+  // Chase: has "Post Date", "Type", "Category" — standard Chase format
+  if (lower.includes('post date') && lower.includes('type') && lower.includes('category')) return 'chase';
+  // Chase fallback: "Transaction Date" + "Post Date" + "Category"
+  if (lower.includes('transaction date') && lower.includes('post date') && lower.includes('category')) return 'chase';
+
   return 'generic';
 }
 
-export function parseCSV(csvContent: string, cardId?: string): Transaction[] {
+function formatToIssuer(format: BankFormat): string {
+  switch (format) {
+    case 'chase': return 'Chase';
+    case 'amex': return 'Amex';
+    case 'capital_one': return 'Capital One';
+    case 'citi': return 'Citi';
+    case 'discover': return 'Discover';
+    case 'boa': return 'Bank of America';
+    default: return '';
+  }
+}
+
+export function detectIssuerFromCSV(csvContent: string): DetectedCard {
+  const result = Papa.parse<RawRow>(csvContent, {
+    header: true,
+    skipEmptyLines: true,
+    transformHeader: (h: string) => h.trim(),
+    preview: 5, // only need a few rows
+  });
+
+  const headers = result.meta.fields || [];
+  const format = detectBankFormat(headers);
+
+  if (format === 'generic') {
+    return { issuer: '', confidence: 'unknown' };
+  }
+
+  const issuer = formatToIssuer(format);
+
+  // Try to narrow down to specific card
+  // Capital One: check Card No. for last 4 digits
+  if (format === 'capital_one' && result.data.length > 0) {
+    const cardNoCol = findColumn(headers, ['card no.', 'card no']);
+    if (cardNoCol) {
+      const lastFour = result.data[0][cardNoCol]?.trim();
+      if (lastFour) {
+        return { issuer, confidence: 'issuer', lastFour };
+      }
+    }
+  }
+
+  return { issuer, confidence: 'issuer' };
+}
+
+export function parseCSV(csvContent: string, cardId?: string): ParsedCSVResult {
   const result = Papa.parse<RawRow>(csvContent, {
     header: true,
     skipEmptyLines: true,
@@ -69,6 +127,7 @@ export function parseCSV(csvContent: string, cardId?: string): Transaction[] {
 
   const headers = result.meta.fields || [];
   const format = detectBankFormat(headers);
+  const issuer = formatToIssuer(format);
 
   const dateCol = findColumn(headers, DATE_COLUMNS);
   const descCol = findColumn(headers, DESC_COLUMNS);
@@ -81,7 +140,7 @@ export function parseCSV(csvContent: string, cardId?: string): Transaction[] {
     );
   }
 
-  // Handle Citi format with separate Debit/Credit columns
+  // Handle Citi / Capital One format with separate Debit/Credit columns
   const debitCol = findColumn(headers, ['debit']);
   const creditCol = findColumn(headers, ['credit']);
 
@@ -92,7 +151,7 @@ export function parseCSV(csvContent: string, cardId?: string): Transaction[] {
     if (!description) continue;
 
     let amount: number;
-    if (format === 'citi' && debitCol && creditCol) {
+    if ((format === 'citi' || format === 'capital_one') && debitCol && creditCol) {
       const debit = parseAmount(row[debitCol]);
       const credit = parseAmount(row[creditCol]);
       amount = debit > 0 ? debit : -credit;
@@ -105,19 +164,40 @@ export function parseCSV(csvContent: string, cardId?: string): Transaction[] {
     // Skip credits/payments (negative after normalization)
     if (amount <= 0) continue;
 
+    // Extract bank category if available
+    const rawBankCategory = categoryCol ? row[categoryCol]?.trim() : undefined;
+    const mappedCategory = rawBankCategory ? mapBankCategory(rawBankCategory, format) : undefined;
+
     transactions.push({
       date: row[dateCol]?.trim() || '',
       description,
       amount: Math.round(amount * 100) / 100,
-      category: categoryCol ? row[categoryCol]?.trim() : undefined,
+      category: mappedCategory || undefined,
+      bankCategory: rawBankCategory || undefined,
       cardId: cardId || undefined,
     });
   }
 
-  return transactions;
+  // Build detection result
+  const detection: DetectedCard = format === 'generic'
+    ? { issuer: '', confidence: 'unknown' }
+    : { issuer, confidence: 'issuer' };
+
+  // Capital One: extract last 4 digits
+  if (format === 'capital_one') {
+    const cardNoCol = findColumn(headers, ['card no.', 'card no']);
+    if (cardNoCol && result.data.length > 0) {
+      const lastFour = result.data[0][cardNoCol]?.trim();
+      if (lastFour) {
+        detection.lastFour = lastFour;
+      }
+    }
+  }
+
+  return { transactions, detection };
 }
 
-// Generate a sample CSV for testing
+// Generate a sample CSV for testing (Chase format)
 export function generateSampleCSV(): string {
   const rows = [
     ['Transaction Date', 'Post Date', 'Description', 'Category', 'Type', 'Amount'],
@@ -142,7 +222,7 @@ export function generateSampleCSV(): string {
     ['01/20/2026', '01/21/2026', 'WALGREENS', 'Health', 'Sale', '-18.99'],
     ['01/21/2026', '01/22/2026', 'TARGET', 'Shopping', 'Sale', '-76.50'],
     ['01/22/2026', '01/23/2026', 'PLANET FITNESS', 'Health', 'Sale', '-25.00'],
-    ['01/23/2026', '01/24/2026', 'VERIZON WIRELESS', 'Bills', 'Sale', '-85.00'],
+    ['01/23/2026', '01/24/2026', 'VERIZON WIRELESS', 'Bills & Utilities', 'Sale', '-85.00'],
     ['01/24/2026', '01/25/2026', 'TRADER JOES', 'Groceries', 'Sale', '-54.80'],
     ['01/25/2026', '01/26/2026', 'AMC THEATRES', 'Entertainment', 'Sale', '-28.00'],
   ];

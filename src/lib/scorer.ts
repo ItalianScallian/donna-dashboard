@@ -64,7 +64,8 @@ export function scoreTransactions(
   let totalSpend = 0;
 
   for (const tx of transactions) {
-    const category = categorizeTransaction(tx.description);
+    // Prefer bank-provided category (already mapped in csv parser), fall back to keyword matching
+    const category = tx.category || categorizeTransaction(tx.description);
     const usedCard = tx.cardId ? userCards.find(c => c.id === tx.cardId) || actualCard : actualCard;
     const actualReward = getRewardValue(usedCard, tx.amount, category);
     const { card: optimalCard, reward: optimalReward } = findOptimalCard(userCards, category, tx.amount);
@@ -73,6 +74,7 @@ export function scoreTransactions(
     scoredTransactions.push({
       ...tx,
       assignedCategory: category,
+      bankCategory: tx.bankCategory,
       actualCard: usedCard,
       actualReward: Math.round(actualReward * 100) / 100,
       optimalCard,

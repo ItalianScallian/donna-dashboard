@@ -23,6 +23,7 @@ export interface Transaction {
   category?: string;
   cardId?: string;
   originalCategory?: string;
+  bankCategory?: string; // raw category from the bank's CSV
 }
 
 export interface ScoredTransaction extends Transaction {
@@ -32,6 +33,7 @@ export interface ScoredTransaction extends Transaction {
   optimalCard: CreditCard;
   optimalReward: number; // dollar value
   missedReward: number; // dollar value
+  bankCategory?: string; // raw category from the bank's CSV
 }
 
 export interface CategoryScore {
@@ -65,4 +67,18 @@ export interface ScoreResult {
   scoredTransactions: ScoredTransaction[];
 }
 
-export type Step = 'select-cards' | 'upload' | 'processing' | 'results';
+export type Issuer = 'Chase' | 'Amex' | 'Capital One' | 'Citi' | 'Discover' | 'Bank of America' | 'Wells Fargo' | 'US Bank' | 'Apple' | 'Barclays' | 'Synchrony' | 'TD Bank' | 'SoFi' | 'Alliant' | 'Fidelity';
+
+export interface DetectedCard {
+  issuer: Issuer | string;
+  cardId?: string; // specific card if we can narrow it down
+  confidence: 'exact' | 'issuer' | 'unknown';
+  lastFour?: string; // from Capital One "Card No." column
+}
+
+export interface ParsedCSVResult {
+  transactions: Transaction[];
+  detection: DetectedCard;
+}
+
+export type Step = 'upload' | 'card-detection' | 'processing' | 'results';

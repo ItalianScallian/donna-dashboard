@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, useInView, useMotionValue, useTransform, animate, useScroll, AnimatePresence } from 'framer-motion';
+import { motion, useInView, useTransform, useScroll, AnimatePresence } from 'framer-motion';
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useScoring } from '@/hooks/useScoring';
 import CardSelector from '@/components/CardSelector';
@@ -100,8 +100,8 @@ function StaggerText({ text, className, delay = 0 }: { text: string; className?:
    ================================================ */
 function StepIndicator({ currentStep }: { currentStep: number }) {
   const steps = [
-    { num: 1, label: 'Cards' },
-    { num: 2, label: 'Upload' },
+    { num: 1, label: 'Upload' },
+    { num: 2, label: 'Cards' },
     { num: 3, label: 'Score' },
   ];
 
@@ -173,8 +173,8 @@ function SectionDivider({ label }: { label: string }) {
    ================================================ */
 export default function Home() {
   const heroRef = useRef(null);
-  const cardsRef = useRef<HTMLDivElement>(null);
   const uploadRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
   const heroY = useTransform(scrollYProgress, [0, 1], [0, 100]);
@@ -185,37 +185,40 @@ export default function Home() {
     selectedCards,
     result,
     error,
+    detection,
     selectCards,
     processFiles,
+    scoreWithCards,
     useSampleData,
     reset,
     goToStep,
   } = useScoring();
 
   // Track which visual step we're at for the indicator
-  const currentStep = step === 'select-cards' ? 1 : step === 'upload' ? 2 : step === 'processing' || step === 'results' ? 3 : 1;
+  // upload = 1, card-detection = 2, processing/results = 3
+  const currentStep = step === 'upload' ? 1 : step === 'card-detection' ? 2 : 3;
 
   // Smooth scroll helper
   const scrollTo = useCallback((ref: React.RefObject<HTMLDivElement | null>) => {
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
 
-  // When cards are selected and user clicks next, scroll to upload
-  const handleCardsNext = useCallback(() => {
-    goToStep('upload');
-    setTimeout(() => scrollTo(uploadRef), 100);
-  }, [goToStep, scrollTo]);
-
-  // When files are uploaded, scroll to results area
+  // When files are uploaded and parsed, scroll to card detection
   const handleFileUpload = useCallback((files: File[]) => {
     processFiles(files);
-    setTimeout(() => scrollTo(resultsRef), 100);
+    setTimeout(() => scrollTo(cardsRef), 300);
   }, [processFiles, scrollTo]);
 
   const handleUseSample = useCallback(() => {
     useSampleData();
-    setTimeout(() => scrollTo(resultsRef), 100);
+    setTimeout(() => scrollTo(cardsRef), 300);
   }, [useSampleData, scrollTo]);
+
+  // When user confirms cards, score and scroll to results
+  const handleConfirmCards = useCallback(() => {
+    scoreWithCards();
+    setTimeout(() => scrollTo(resultsRef), 100);
+  }, [scoreWithCards, scrollTo]);
 
   // When results arrive, smooth scroll to them
   useEffect(() => {
@@ -230,9 +233,9 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [reset]);
 
-  // Scroll to cards section from hero CTA
+  // Scroll to upload section from hero CTA
   const handleGetStarted = useCallback(() => {
-    scrollTo(cardsRef);
+    scrollTo(uploadRef);
   }, [scrollTo]);
 
   return (
@@ -323,8 +326,8 @@ export default function Home() {
               transition={{ duration: 0.7, delay: 0.5 }}
               className="text-lg md:text-xl text-text-secondary max-w-2xl mx-auto leading-relaxed mb-12"
             >
-              Select your cards, upload a statement, and find out exactly how much money
-              you&apos;re leaving on the table — all without leaving this page.
+              Upload your statement and we&apos;ll auto-detect your card, score every transaction,
+              and show you exactly how much money you&apos;re leaving on the table.
             </motion.p>
 
             <motion.div
@@ -378,41 +381,43 @@ export default function Home() {
         </section>
 
         {/* ============================================
-            STEP 1: SELECT YOUR CARDS
+            STEP 1: UPLOAD YOUR STATEMENT
             ============================================ */}
-        <section ref={cardsRef} className="px-6 md:px-10 py-24 md:py-32 max-w-7xl mx-auto scroll-mt-20">
+        <section ref={uploadRef} className="px-6 md:px-10 py-24 md:py-32 max-w-7xl mx-auto scroll-mt-20">
           <AnimatedSection>
             <SectionDivider label="Step 1" />
-            <CardSelector
-              selectedCards={selectedCards}
-              onSelect={selectCards}
-              onNext={handleCardsNext}
+            <FileUpload
+              onUpload={handleFileUpload}
+              onUseSample={handleUseSample}
+              onBack={() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              error={error && step === 'upload' ? error : null}
+              hideBack
             />
           </AnimatedSection>
         </section>
 
         {/* ============================================
-            STEP 2: UPLOAD YOUR STATEMENT
+            STEP 2: CARD DETECTION / SELECTION
             ============================================ */}
         <AnimatePresence>
-          {(step === 'upload' || step === 'processing' || step === 'results') && (
+          {(step === 'card-detection' || step === 'processing' || step === 'results') && (
             <motion.section
-              ref={uploadRef}
+              ref={cardsRef}
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
               className="px-6 md:px-10 py-24 md:py-32 max-w-7xl mx-auto border-t border-ps-border scroll-mt-20"
             >
               <SectionDivider label="Step 2" />
-              {step === 'upload' && (
-                <FileUpload
-                  onUpload={handleFileUpload}
-                  onUseSample={handleUseSample}
-                  onBack={() => {
-                    goToStep('select-cards');
-                    setTimeout(() => scrollTo(cardsRef), 100);
-                  }}
-                  error={error}
+              {step === 'card-detection' && (
+                <CardSelector
+                  selectedCards={selectedCards}
+                  onSelect={selectCards}
+                  onNext={handleConfirmCards}
+                  detection={detection}
+                  onConfirmDetection={handleConfirmCards}
                 />
               )}
               {step === 'processing' && (

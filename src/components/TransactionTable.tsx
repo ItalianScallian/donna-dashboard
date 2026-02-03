@@ -46,9 +46,16 @@ export default function TransactionTable({ transactions }: TransactionTableProps
                 <td className="py-2.5 px-2 text-text-tertiary whitespace-nowrap" style={{ fontFamily: 'var(--font-mono)' }}>{tx.date}</td>
                 <td className="py-2.5 px-2 text-text-primary font-medium max-w-[200px] truncate">{tx.description}</td>
                 <td className="py-2.5 px-2">
-                  <span className="px-2 py-0.5 bg-surface-3 border border-ps-border text-[10px] text-text-secondary uppercase tracking-wider" style={{ fontFamily: 'var(--font-mono)' }}>
-                    {getCategoryLabel(tx.assignedCategory)}
-                  </span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="px-2 py-0.5 bg-surface-3 border border-ps-border text-[10px] text-text-secondary uppercase tracking-wider inline-block w-fit" style={{ fontFamily: 'var(--font-mono)' }}>
+                      {getCategoryLabel(tx.assignedCategory)}
+                    </span>
+                    {tx.bankCategory && (
+                      <span className="text-[9px] text-text-tertiary" style={{ fontFamily: 'var(--font-mono)' }}>
+                        Coded as: {tx.bankCategory}
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="py-2.5 px-2 text-right text-text-primary" style={{ fontFamily: 'var(--font-mono)' }}>${tx.amount.toFixed(2)}</td>
                 <td className="py-2.5 px-2 text-right text-accent" style={{ fontFamily: 'var(--font-mono)' }}>${tx.actualReward.toFixed(2)}</td>

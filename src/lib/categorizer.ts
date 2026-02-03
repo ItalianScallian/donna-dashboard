@@ -1,3 +1,143 @@
+// BankFormat is defined here to avoid circular imports (csv.ts imports from this file)
+export type BankFormat = 'chase' | 'amex' | 'capital_one' | 'citi' | 'discover' | 'boa' | 'generic';
+
+// ============================================================
+// Bank category → internal category mapping
+// When a bank CSV includes a "Category" column, we prefer
+// that over keyword-based categorization.
+// ============================================================
+
+const chaseCategoryMap: Record<string, string> = {
+  'food & drink': 'dining',
+  'dining': 'dining',
+  'restaurants': 'dining',
+  'travel': 'travel',
+  'gas': 'gas',
+  'automotive': 'gas',
+  'groceries': 'groceries',
+  'grocery': 'groceries',
+  'entertainment': 'entertainment',
+  'shopping': 'retail',
+  'merchandise': 'retail',
+  'health & wellness': 'health',
+  'health': 'health',
+  'personal': 'health',
+  'bills & utilities': 'utilities',
+  'bills': 'utilities',
+  'home': 'home_improvement',
+  'education': 'education',
+  'professional services': 'retail',
+  'services': 'retail',
+  'fees & adjustments': 'uncategorized',
+  'gifts & donations': 'uncategorized',
+};
+
+const amexCategoryMap: Record<string, string> = {
+  'restaurant': 'dining',
+  'restaurant-restaurant': 'dining',
+  'restaurant-bar & café': 'dining',
+  'food & drink': 'dining',
+  'dining': 'dining',
+  'merchandise & supplies-groceries': 'groceries',
+  'groceries': 'groceries',
+  'grocery': 'groceries',
+  'transportation-fuel': 'gas',
+  'gas': 'gas',
+  'gas station': 'gas',
+  'fuel': 'gas',
+  'travel': 'travel',
+  'travel-airline': 'flights',
+  'airline': 'flights',
+  'travel-lodging': 'hotels',
+  'hotel': 'hotels',
+  'lodging': 'hotels',
+  'transportation': 'transit',
+  'transportation-taxi & rideshare': 'transit',
+  'entertainment': 'entertainment',
+  'entertainment-streaming': 'streaming',
+  'streaming': 'streaming',
+  'merchandise & supplies': 'retail',
+  'shopping': 'retail',
+  'retail': 'retail',
+  'health': 'health',
+  'health & wellness': 'health',
+  'business services': 'retail',
+  'fees & adjustments': 'uncategorized',
+};
+
+const capitalOneCategoryMap: Record<string, string> = {
+  'dining': 'dining',
+  'food & drink': 'dining',
+  'restaurants': 'dining',
+  'gas': 'gas',
+  'gas/automotive': 'gas',
+  'groceries': 'groceries',
+  'grocery': 'groceries',
+  'entertainment': 'entertainment',
+  'travel': 'travel',
+  'hotel': 'hotels',
+  'airline': 'flights',
+  'shopping': 'retail',
+  'merchandise': 'retail',
+  'health': 'health',
+  'health care': 'health',
+  'fee/interest charge': 'uncategorized',
+  'payment/credit': 'uncategorized',
+  'other': 'uncategorized',
+  'other services': 'retail',
+  'phone/cable': 'phone',
+  'internet': 'internet',
+  'education': 'education',
+};
+
+const discoverCategoryMap: Record<string, string> = {
+  'restaurants': 'dining',
+  'dining': 'dining',
+  'food & drink': 'dining',
+  'supermarkets': 'groceries',
+  'groceries': 'groceries',
+  'grocery stores': 'groceries',
+  'gas stations': 'gas',
+  'gasoline': 'gas',
+  'gas': 'gas',
+  'travel': 'travel',
+  'travel/ entertainment': 'travel',
+  'hotels': 'hotels',
+  'airlines': 'flights',
+  'entertainment': 'entertainment',
+  'merchandise': 'retail',
+  'department stores': 'retail',
+  'wholesale clubs': 'retail',
+  'medical services': 'health',
+  'services': 'retail',
+  'automotive': 'auto',
+  'education': 'education',
+  'home improvement': 'home_improvement',
+};
+
+/**
+ * Map a bank's raw category string to our internal category.
+ * Returns undefined if no mapping found — caller should fall back to keyword matching.
+ */
+export function mapBankCategory(rawCategory: string, format: string): string | undefined {
+  if (!rawCategory) return undefined;
+
+  const key = rawCategory.toLowerCase().trim();
+  let map: Record<string, string>;
+
+  switch (format) {
+    case 'chase': map = chaseCategoryMap; break;
+    case 'amex': map = amexCategoryMap; break;
+    case 'capital_one': map = capitalOneCategoryMap; break;
+    case 'discover': map = discoverCategoryMap; break;
+    default:
+      // Try a generic approach: check all maps
+      return chaseCategoryMap[key] || amexCategoryMap[key] || discoverCategoryMap[key] || undefined;
+  }
+
+  return map[key] || undefined;
+}
+
 // Maps transaction descriptions to reward categories
 // 200+ common merchants mapped
 

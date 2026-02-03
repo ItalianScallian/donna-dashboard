@@ -1,30 +1,31 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { CreditCard, Transaction, ScoreResult, Step } from '@/lib/types';
+import { CreditCard, Transaction, ScoreResult, Step, DetectedCard } from '@/lib/types';
 import { parseCSV } from '@/lib/parsers/csv';
 import { scoreTransactions } from '@/lib/scorer';
 
 export function useScoring() {
-  const [step, setStep] = useState<Step>('select-cards');
+  const [step, setStep] = useState<Step>('upload');
   const [selectedCards, setSelectedCards] = useState<CreditCard[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [result, setResult] = useState<ScoreResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [detection, setDetection] = useState<DetectedCard | null>(null);
 
   const selectCards = useCallback((cards: CreditCard[]) => {
     setSelectedCards(cards);
     setError(null);
   }, []);
 
+  // Step 1: Parse files and detect issuer, then go to card-detection step
   const processFiles = useCallback(async (files: File[]) => {
     setError(null);
-    setIsProcessing(true);
-    setStep('processing');
 
     try {
       const allTransactions: Transaction[] = [];
+      let lastDetection: DetectedCard | null = null;
 
       for (const file of files) {
         if (file.name.toLowerCase().endsWith('.pdf')) {
@@ -32,8 +33,12 @@ export function useScoring() {
         }
 
         const text = await file.text();
-        const parsed = parseCSV(text, selectedCards[0]?.id);
+        const { transactions: parsed, detection: det } = parseCSV(text);
         allTransactions.push(...parsed);
+        // Use the last detected issuer (most files will be from same issuer)
+        if (det.confidence !== 'unknown') {
+          lastDetection = det;
+        }
       }
 
       if (allTransactions.length === 0) {
@@ -41,53 +46,67 @@ export function useScoring() {
       }
 
       setTransactions(allTransactions);
-
-      // Simulate processing time for animation
-      await new Promise(resolve => setTimeout(resolve, 2500));
-
-      const scoreResult = scoreTransactions(allTransactions, selectedCards);
-      setResult(scoreResult);
-      setStep('results');
+      setDetection(lastDetection);
+      setStep('card-detection');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to process files');
       setStep('upload');
-    } finally {
-      setIsProcessing(false);
     }
-  }, [selectedCards]);
+  }, []);
 
-  const useSampleData = useCallback(async () => {
+  // Step 2: User confirmed cards → score
+  const scoreWithCards = useCallback(async () => {
+    if (selectedCards.length === 0) return;
     setError(null);
     setIsProcessing(true);
     setStep('processing');
 
     try {
-      const { generateSampleCSV } = await import('@/lib/parsers/csv');
-      const sampleCSV = generateSampleCSV();
-      const parsed = parseCSV(sampleCSV, selectedCards[0]?.id);
+      // Assign cardId to transactions
+      const txsWithCard = transactions.map(tx => ({
+        ...tx,
+        cardId: tx.cardId || selectedCards[0]?.id,
+      }));
 
-      setTransactions(parsed);
-
+      // Simulate processing time for animation
       await new Promise(resolve => setTimeout(resolve, 2500));
 
-      const scoreResult = scoreTransactions(parsed, selectedCards);
+      const scoreResult = scoreTransactions(txsWithCard, selectedCards);
       setResult(scoreResult);
       setStep('results');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to process sample data');
-      setStep('upload');
+      setError(err instanceof Error ? err.message : 'Failed to score transactions');
+      setStep('card-detection');
     } finally {
       setIsProcessing(false);
     }
-  }, [selectedCards]);
+  }, [transactions, selectedCards]);
+
+  const useSampleData = useCallback(async () => {
+    setError(null);
+
+    try {
+      const { generateSampleCSV, parseCSV: parseCsvFn } = await import('@/lib/parsers/csv');
+      const sampleCSV = generateSampleCSV();
+      const { transactions: parsed, detection: det } = parseCsvFn(sampleCSV);
+
+      setTransactions(parsed);
+      setDetection(det);
+      setStep('card-detection');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to process sample data');
+      setStep('upload');
+    }
+  }, []);
 
   const reset = useCallback(() => {
-    setStep('select-cards');
+    setStep('upload');
     setSelectedCards([]);
     setTransactions([]);
     setResult(null);
     setError(null);
     setIsProcessing(false);
+    setDetection(null);
   }, []);
 
   const goToStep = useCallback((newStep: Step) => {
@@ -102,8 +121,10 @@ export function useScoring() {
     result,
     error,
     isProcessing,
+    detection,
     selectCards,
     processFiles,
+    scoreWithCards,
     useSampleData,
     reset,
     goToStep,
