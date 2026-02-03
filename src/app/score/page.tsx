@@ -9,9 +9,9 @@ import ProcessingAnimation from '@/components/ProcessingAnimation';
 import ReportCard from '@/components/ReportCard';
 
 const stepLabels = [
-  { key: 'select-cards', label: 'Select Cards', num: 1 },
+  { key: 'select-cards', label: 'Cards', num: 1 },
   { key: 'upload', label: 'Upload', num: 2 },
-  { key: 'processing', label: 'Processing', num: 3 },
+  { key: 'processing', label: 'Analyze', num: 3 },
   { key: 'results', label: 'Results', num: 4 },
 ];
 
@@ -31,17 +31,22 @@ export default function ScorePage() {
   const currentStepIndex = stepLabels.findIndex(s => s.key === step);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ fontFamily: 'var(--font-body)' }}>
       {/* Nav */}
-      <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-800/50">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-2xl">💳</span>
-          <span className="font-bold text-white text-lg">Point Scorer</span>
+      <nav className="flex items-center justify-between px-6 md:px-10 py-5 border-b border-ps-border">
+        <Link href="/" className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-accent flex items-center justify-center" style={{ fontFamily: 'var(--font-display)' }}>
+            <span className="text-black font-extrabold text-sm">P</span>
+          </div>
+          <span className="font-semibold text-text-primary text-base tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
+            Point Scorer
+          </span>
         </Link>
         {step !== 'select-cards' && step !== 'processing' && (
           <button
             onClick={reset}
-            className="px-4 py-2 text-slate-400 hover:text-white text-sm font-medium transition-colors"
+            className="px-4 py-2 text-text-secondary hover:text-accent text-sm font-medium transition-colors"
+            style={{ fontFamily: 'var(--font-display)' }}
           >
             Start Over
           </button>
@@ -49,37 +54,41 @@ export default function ScorePage() {
       </nav>
 
       {/* Progress */}
-      <div className="px-6 py-4 border-b border-slate-800/30">
+      <div className="px-6 md:px-10 py-4 border-b border-ps-border">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between relative">
             {/* Progress line */}
-            <div className="absolute top-4 left-0 right-0 h-0.5 bg-slate-700">
+            <div className="absolute top-3 left-0 right-0 h-px bg-ps-border">
               <motion.div
-                className="h-full bg-indigo-500"
+                className="h-full bg-accent"
                 initial={{ width: '0%' }}
                 animate={{ width: `${(currentStepIndex / (stepLabels.length - 1)) * 100}%` }}
-                transition={{ duration: 0.5 }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               />
             </div>
 
             {stepLabels.map((s, i) => (
               <div key={s.key} className="relative flex flex-col items-center z-10">
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                  className={`w-6 h-6 flex items-center justify-center text-xs font-bold transition-all duration-300 ${
                     i <= currentStepIndex
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-slate-700 text-slate-500'
+                      ? 'bg-accent text-black'
+                      : 'bg-surface-2 text-text-tertiary border border-ps-border'
                   }`}
+                  style={{ fontFamily: 'var(--font-mono)' }}
                 >
                   {i < currentStepIndex ? (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   ) : (
                     s.num
                   )}
                 </div>
-                <span className={`text-xs mt-1.5 ${i <= currentStepIndex ? 'text-slate-300' : 'text-slate-600'}`}>
+                <span
+                  className={`text-[10px] mt-1.5 uppercase tracking-wider ${i <= currentStepIndex ? 'text-accent' : 'text-text-tertiary'}`}
+                  style={{ fontFamily: 'var(--font-mono)' }}
+                >
                   {s.label}
                 </span>
               </div>
@@ -89,7 +98,7 @@ export default function ScorePage() {
       </div>
 
       {/* Content */}
-      <main className="flex-1 px-6 py-10">
+      <main className="flex-1 px-6 md:px-10 py-10">
         <AnimatePresence mode="wait">
           {step === 'select-cards' && (
             <motion.div key="cards" exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>

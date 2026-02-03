@@ -11,22 +11,22 @@ interface CardSelectorProps {
   onNext: () => void;
 }
 
-const issuerColors: Record<string, string> = {
-  'Chase': 'bg-blue-600',
-  'Amex': 'bg-blue-500',
-  'Citi': 'bg-sky-600',
-  'Capital One': 'bg-red-600',
-  'Discover': 'bg-orange-500',
-  'Wells Fargo': 'bg-yellow-600',
-  'US Bank': 'bg-purple-600',
-  'Bank of America': 'bg-red-700',
-  'Apple': 'bg-gray-500',
-  'Barclays': 'bg-cyan-600',
-  'Synchrony': 'bg-teal-600',
-  'TD Bank': 'bg-green-600',
-  'SoFi': 'bg-indigo-600',
-  'Alliant': 'bg-emerald-600',
-  'Fidelity': 'bg-green-700',
+const issuerAccents: Record<string, string> = {
+  'Chase': '#0066ff',
+  'Amex': '#006fcf',
+  'Citi': '#003b70',
+  'Capital One': '#d03027',
+  'Discover': '#ff6600',
+  'Wells Fargo': '#d71e28',
+  'US Bank': '#c41230',
+  'Bank of America': '#e31837',
+  'Apple': '#555555',
+  'Barclays': '#00aeef',
+  'Synchrony': '#00857c',
+  'TD Bank': '#34a853',
+  'SoFi': '#7b68ee',
+  'Alliant': '#003087',
+  'Fidelity': '#498505',
 };
 
 export default function CardSelector({ selectedCards, onSelect, onNext }: CardSelectorProps) {
@@ -64,42 +64,59 @@ export default function CardSelector({ selectedCards, onSelect, onNext }: CardSe
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-8"
+        className="mb-10"
       >
-        <h2 className="text-3xl font-bold text-white mb-2">Select Your Cards</h2>
-        <p className="text-slate-400">Choose the credit cards in your wallet. We&apos;ll figure out the optimal card for every purchase.</p>
+        <h2
+          className="text-3xl md:text-4xl font-extrabold text-text-primary tracking-tighter mb-3"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
+          What&apos;s in your wallet?
+        </h2>
+        <p className="text-text-secondary">Select the credit cards you carry. We&apos;ll figure out which one wins for every purchase.</p>
       </motion.div>
 
       {/* Search */}
       <div className="mb-6">
-        <input
-          type="text"
-          placeholder="Search cards..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-        />
+        <div className="relative">
+          <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search cards..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full pl-11 pr-4 py-3 bg-surface border border-ps-border text-text-primary placeholder-text-tertiary focus:outline-none focus:border-accent transition-colors"
+            style={{ fontFamily: 'var(--font-body)' }}
+          />
+        </div>
       </div>
 
       {/* Issuer Filter */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-1.5 mb-6">
         <button
           onClick={() => setFilterIssuer(null)}
-          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-            !filterIssuer ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+          className={`px-3 py-1.5 text-xs font-medium transition-all border ${
+            !filterIssuer
+              ? 'bg-accent text-black border-accent'
+              : 'bg-transparent text-text-secondary border-ps-border hover:border-border-hover hover:text-text-primary'
           }`}
+          style={{ fontFamily: 'var(--font-mono)' }}
         >
-          All
+          ALL
         </button>
         {issuers.map(issuer => (
           <button
             key={issuer}
             onClick={() => setFilterIssuer(filterIssuer === issuer ? null : issuer)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-              filterIssuer === issuer ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+            className={`px-3 py-1.5 text-xs font-medium transition-all border ${
+              filterIssuer === issuer
+                ? 'bg-accent text-black border-accent'
+                : 'bg-transparent text-text-secondary border-ps-border hover:border-border-hover hover:text-text-primary'
             }`}
+            style={{ fontFamily: 'var(--font-mono)' }}
           >
-            {issuer}
+            {issuer.toUpperCase()}
           </button>
         ))}
       </div>
@@ -111,20 +128,23 @@ export default function CardSelector({ selectedCards, onSelect, onNext }: CardSe
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mb-4 flex flex-wrap items-center gap-2"
+            className="mb-5 flex flex-wrap items-center gap-2"
           >
-            <span className="text-sm text-slate-400">{selectedCards.length} selected:</span>
+            <span className="text-xs text-text-tertiary uppercase tracking-wider" style={{ fontFamily: 'var(--font-mono)' }}>
+              {selectedCards.length} selected
+            </span>
+            <span className="text-text-tertiary">·</span>
             {selectedCards.map(card => (
               <span
                 key={card.id}
-                className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-600/20 border border-indigo-500/30 rounded-full text-xs text-indigo-300"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 border border-accent/30 bg-accent/5 text-xs text-accent"
               >
                 {card.name}
                 <button
                   onClick={() => toggleCard(card)}
-                  className="hover:text-white ml-1"
+                  className="hover:text-text-primary ml-0.5 opacity-60 hover:opacity-100"
                 >
-                  ✕
+                  ×
                 </button>
               </span>
             ))}
@@ -133,50 +153,82 @@ export default function CardSelector({ selectedCards, onSelect, onNext }: CardSe
       </AnimatePresence>
 
       {/* Card Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8 max-h-[50vh] overflow-y-auto pr-2">
-        {filtered.map((card, i) => (
-          <motion.button
-            key={card.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: Math.min(i * 0.02, 0.5) }}
-            onClick={() => toggleCard(card)}
-            className={`relative p-4 rounded-xl border text-left transition-all ${
-              isSelected(card)
-                ? 'bg-indigo-600/20 border-indigo-500 ring-1 ring-indigo-500/50'
-                : 'bg-slate-800/50 border-slate-700 hover:border-slate-600 hover:bg-slate-800'
-            }`}
-          >
-            {isSelected(card) && (
-              <div className="absolute top-2 right-2 w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center">
-                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-8 max-h-[50vh] overflow-y-auto pr-1">
+        {filtered.map((card, i) => {
+          const selected = isSelected(card);
+          const accentColor = issuerAccents[card.issuer] || '#555';
+          return (
+            <motion.button
+              key={card.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: Math.min(i * 0.02, 0.4) }}
+              onClick={() => toggleCard(card)}
+              className={`relative p-4 border text-left transition-all duration-200 group ${
+                selected
+                  ? 'bg-accent/5 border-accent'
+                  : 'bg-surface border-ps-border hover:border-border-hover hover:bg-surface-2'
+              }`}
+            >
+              {/* Selection indicator */}
+              {selected && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute top-2 right-2 w-5 h-5 bg-accent flex items-center justify-center"
+                >
+                  <svg className="w-3 h-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </motion.div>
+              )}
+
+              {/* Issuer tag */}
+              <div
+                className="inline-block px-2 py-0.5 text-[10px] font-bold text-white mb-2 uppercase tracking-wider"
+                style={{ backgroundColor: accentColor, fontFamily: 'var(--font-mono)' }}
+              >
+                {card.issuer}
               </div>
-            )}
-            <div className={`inline-block px-2 py-0.5 rounded text-xs font-medium text-white mb-2 ${issuerColors[card.issuer] || 'bg-slate-600'}`}>
-              {card.issuer}
-            </div>
-            <h3 className="font-semibold text-white text-sm leading-tight">{card.name}</h3>
-            <div className="flex items-center gap-3 mt-2 text-xs text-slate-400">
-              <span>{card.baseReward}x base</span>
-              <span>•</span>
-              <span>{card.annualFee === 0 ? 'No AF' : `$${card.annualFee}/yr`}</span>
-            </div>
-            {card.categories.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-1">
-                {card.categories.slice(0, 3).map((cat, j) => (
-                  <span key={j} className="px-1.5 py-0.5 bg-slate-700/50 rounded text-[10px] text-slate-300">
-                    {cat.multiplier}x {cat.category.replace(/_/g, ' ')}
-                  </span>
-                ))}
-                {card.categories.length > 3 && (
-                  <span className="px-1.5 py-0.5 text-[10px] text-slate-500">+{card.categories.length - 3} more</span>
-                )}
+
+              <h3 className="font-semibold text-text-primary text-sm leading-tight mb-2" style={{ fontFamily: 'var(--font-display)' }}>
+                {card.name}
+              </h3>
+
+              <div className="flex items-center gap-3 text-xs text-text-tertiary" style={{ fontFamily: 'var(--font-mono)' }}>
+                <span>{card.baseReward}x base</span>
+                <span className="text-text-tertiary">·</span>
+                <span>{card.annualFee === 0 ? 'No AF' : `$${card.annualFee}/yr`}</span>
               </div>
-            )}
-          </motion.button>
-        ))}
+
+              {card.categories.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {card.categories.slice(0, 3).map((cat, j) => (
+                    <span
+                      key={j}
+                      className="px-1.5 py-0.5 bg-surface-3 border border-ps-border text-[10px] text-text-secondary"
+                      style={{ fontFamily: 'var(--font-mono)' }}
+                    >
+                      {cat.multiplier}x {cat.category.replace(/_/g, ' ')}
+                    </span>
+                  ))}
+                  {card.categories.length > 3 && (
+                    <span className="px-1.5 py-0.5 text-[10px] text-text-tertiary">+{card.categories.length - 3}</span>
+                  )}
+                </div>
+              )}
+
+              {/* Bottom accent line on selected */}
+              {selected && (
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: '100%' }}
+                  className="absolute bottom-0 left-0 h-0.5 bg-accent"
+                />
+              )}
+            </motion.button>
+          );
+        })}
       </div>
 
       {/* Continue Button */}
@@ -184,13 +236,14 @@ export default function CardSelector({ selectedCards, onSelect, onNext }: CardSe
         <button
           onClick={onNext}
           disabled={selectedCards.length === 0}
-          className={`px-8 py-3 rounded-xl font-semibold text-lg transition-all ${
+          className={`px-10 py-4 font-bold text-lg tracking-tight transition-all ${
             selectedCards.length > 0
-              ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/25'
-              : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+              ? 'bg-accent text-black hover:bg-accent-dim'
+              : 'bg-surface-2 text-text-tertiary border border-ps-border cursor-not-allowed'
           }`}
+          style={{ fontFamily: 'var(--font-display)' }}
         >
-          Continue with {selectedCards.length} card{selectedCards.length !== 1 ? 's' : ''}
+          Continue with {selectedCards.length} card{selectedCards.length !== 1 ? 's' : ''} →
         </button>
       </motion.div>
     </div>
