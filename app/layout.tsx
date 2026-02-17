@@ -1,9 +1,13 @@
 import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
 import './globals.css'
+import Nav from '@/components/Nav'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Point Scorer — Credit Card Rewards Optimizer',
-  description: 'Find out how much money you left on the table by using the wrong credit card.',
+  title: 'DONNA — Command Center',
+  description: 'Romeo Scagliarini — Life Operating System',
 }
 
 export default function RootLayout({
@@ -12,9 +16,10 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen bg-gray-950 text-gray-100">
-        {children}
+    <html lang="en">
+      <body className={inter.className} style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+        <Nav />
+        <main>{children}</main>
       </body>
     </html>
   )

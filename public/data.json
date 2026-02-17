@@ -1,0 +1,387 @@
+{
+  "goals": [
+    {
+      "name": "Bucket List",
+      "type": "progress",
+      "current": 0,
+      "target": 0,
+      "unit": ""
+    },
+    {
+      "name": "Bulk Up",
+      "type": "milestone",
+      "milestones": [
+        {
+          "name": "158 lbs (Feb)",
+          "completed": false
+        },
+        {
+          "name": "160 lbs (Mar)",
+          "completed": false
+        },
+        {
+          "name": "163 lbs (Apr)",
+          "completed": false
+        },
+        {
+          "name": "165 lbs (May)",
+          "completed": false
+        },
+        {
+          "name": "167 lbs (Jun)",
+          "completed": false
+        },
+        {
+          "name": "170 lbs (Jul)",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "name": "Character Blueprint",
+      "type": "progress",
+      "current": 0,
+      "target": 0,
+      "unit": ""
+    },
+    {
+      "name": "Become a Content Creator / Build Personal Brand",
+      "type": "milestone",
+      "milestones": [
+        {
+          "name": "Record first video (Clawdbot video, 2026-01-31)",
+          "completed": true
+        },
+        {
+          "name": "Day 1 of daily challenge (2026-02-04)",
+          "completed": false
+        },
+        {
+          "name": "Post consistently for 1 month",
+          "completed": false
+        },
+        {
+          "name": "100 followers milestone",
+          "completed": false
+        },
+        {
+          "name": "First piece of content that gets real engagement",
+          "completed": false
+        },
+        {
+          "name": "1,000 followers",
+          "completed": false
+        },
+        {
+          "name": "Monetization opportunity from audience",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "name": "Build Extra Income / Passive Income",
+      "type": "milestone",
+      "milestones": [
+        {
+          "name": "Build idea validation system",
+          "completed": true
+        },
+        {
+          "name": "Build business opportunity scanner",
+          "completed": true
+        },
+        {
+          "name": "Build Point Scorer MVP (both Next.js & TanStack Start)",
+          "completed": true
+        },
+        {
+          "name": "Pick framework for Point Scorer (Next.js vs TanStack Start)",
+          "completed": false
+        },
+        {
+          "name": "Validate one idea through full pipeline",
+          "completed": false
+        },
+        {
+          "name": "First dollar earned outside day job",
+          "completed": false
+        },
+        {
+          "name": "Recurring revenue",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "name": "Financial Freedom",
+      "type": "milestone",
+      "milestones": [
+        {
+          "name": "Define \"freedom number\" — target annual passive income",
+          "completed": false
+        },
+        {
+          "name": "Track net worth monthly",
+          "completed": false
+        },
+        {
+          "name": "First recurring revenue stream outside salary",
+          "completed": false
+        },
+        {
+          "name": "Tax optimization for nomad/Spain/US dual situation",
+          "completed": false
+        },
+        {
+          "name": "Side project generates revenue",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "name": "Learn Spanish",
+      "type": "milestone",
+      "milestones": [
+        {
+          "name": "Order food / small talk confidently",
+          "completed": false
+        },
+        {
+          "name": "Follow a work meeting in Spanish",
+          "completed": false
+        },
+        {
+          "name": "Have a 15-min conversation without switching to English",
+          "completed": false
+        },
+        {
+          "name": "Watch a Spanish show without subtitles",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "name": "Public Speaking & Communication",
+      "type": "milestone",
+      "milestones": [
+        {
+          "name": "Give a presentation at work (CD Castellón)",
+          "completed": false
+        },
+        {
+          "name": "Record daily video content consistently (Higher Up Wellness)",
+          "completed": false
+        },
+        {
+          "name": "Present to a group of 10+ people",
+          "completed": false
+        },
+        {
+          "name": "Join Toastmasters or equivalent",
+          "completed": false
+        },
+        {
+          "name": "Give a talk at a meetup or event",
+          "completed": false
+        }
+      ]
+    }
+  ],
+  "portfolio": {
+    "total": 0,
+    "stocks": [
+      {
+        "symbol": "JEPQ",
+        "price": 57.55,
+        "change": 0.07
+      },
+      {
+        "symbol": "AMZN",
+        "price": 200.93,
+        "change": 1.08
+      },
+      {
+        "symbol": "IREN",
+        "price": 41.66,
+        "change": -1.33
+      },
+      {
+        "symbol": "ARRNF",
+        "price": 0.2706,
+        "change": -3.32
+      },
+      {
+        "symbol": "VOO",
+        "price": 628.735,
+        "change": 0.29
+      }
+    ],
+    "crypto": [
+      {
+        "symbol": "BTC",
+        "price": 67872.39,
+        "change": -1.42
+      },
+      {
+        "symbol": "ETH",
+        "price": 2000.119,
+        "change": 0.11
+      },
+      {
+        "symbol": "SOL",
+        "price": 84.82653,
+        "change": -1.85
+      },
+      {
+        "symbol": "HYPE",
+        "price": 0,
+        "change": 0
+      }
+    ]
+  },
+  "contentStats": {
+    "followers": 0,
+    "engagement": 0,
+    "streak": 0
+  },
+  "people": {
+    "overdue": [
+      {
+        "name": "Matt Hains",
+        "tier": "Inner Circle",
+        "daysSince": 0,
+        "cadence": "daily"
+      },
+      {
+        "name": "Lucas Goldschmidt",
+        "tier": "Inner Circle",
+        "daysSince": 0,
+        "cadence": "every 2 days"
+      },
+      {
+        "name": "Andy Kneepkens",
+        "tier": "Inner Circle",
+        "daysSince": 0,
+        "cadence": "daily-every 2 days"
+      },
+      {
+        "name": "Travis Ralstin",
+        "tier": "Core",
+        "daysSince": 0,
+        "cadence": "2-3x/week"
+      },
+      {
+        "name": "Ryan Hess",
+        "tier": "Core",
+        "daysSince": 0,
+        "cadence": "2-3x/week"
+      }
+    ],
+    "birthdays": [
+      {
+        "name": "Stuart Oleinick",
+        "date": "Feb 20",
+        "daysUntil": 6
+      },
+      {
+        "name": "Hayden Myers",
+        "date": "Feb 24",
+        "daysUntil": 10
+      }
+    ]
+  },
+  "accountability": [
+    {
+      "id": "workout",
+      "label": "Worked out today"
+    },
+    {
+      "id": "spanish",
+      "label": "Practiced Spanish"
+    },
+    {
+      "id": "content",
+      "label": "Posted content"
+    },
+    {
+      "id": "journal",
+      "label": "Journaled"
+    }
+  ],
+  "cronHealth": [
+    {
+      "name": "Dashboard Data Refresh",
+      "status": "OK",
+      "lastRun": "Never",
+      "nextRun": "Not scheduled"
+    },
+    {
+      "name": "Auto-Journal",
+      "status": "OK",
+      "lastRun": "Never",
+      "nextRun": "Not scheduled"
+    },
+    {
+      "name": "Self-Improvement Scan",
+      "status": "OK",
+      "lastRun": "Never",
+      "nextRun": "Not scheduled"
+    },
+    {
+      "name": "Daily Video Topics",
+      "status": "OK",
+      "lastRun": "Never",
+      "nextRun": "Not scheduled"
+    },
+    {
+      "name": "Morning Briefing",
+      "status": "OK",
+      "lastRun": "Never",
+      "nextRun": "Not scheduled"
+    },
+    {
+      "name": "Edge Finder",
+      "status": "OK",
+      "lastRun": "Never",
+      "nextRun": "Not scheduled"
+    },
+    {
+      "name": "Twitter Feed Digest",
+      "status": "OK",
+      "lastRun": "Never",
+      "nextRun": "Not scheduled"
+    },
+    {
+      "name": "LEAP Scanner (7d/14d/30d RSI < 30)",
+      "status": "OK",
+      "lastRun": "Never",
+      "nextRun": "Not scheduled"
+    },
+    {
+      "name": "Evening Summary",
+      "status": "OK",
+      "lastRun": "Never",
+      "nextRun": "Not scheduled"
+    },
+    {
+      "name": "Weekly Workout Check-in",
+      "status": "OK",
+      "lastRun": "Never",
+      "nextRun": "Not scheduled"
+    },
+    {
+      "name": "Weekly Workout Plan",
+      "status": "OK",
+      "lastRun": "Never",
+      "nextRun": "Not scheduled"
+    }
+  ],
+  "edgeFinder": [],
+  "twitterPulse": [],
+  "system": {
+    "uptime": "3 weeks, 9 hours, 46 minutes",
+    "diskUsage": "37%",
+    "memoryUsage": "53%",
+    "openclawVersion": "2026.2.13"
+  }
+}
