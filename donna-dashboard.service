@@ -1,0 +1,16 @@
+[Unit]
+Description=Donna Dashboard — Personal Command Center
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/.openclaw/workspace/donna-dashboard
+ExecStart=/usr/bin/npm start
+Restart=on-failure
+RestartSec=5s
+Environment=NODE_ENV=production
+Environment=PORT=3000
+
+[Install]
+WantedBy=multi-user.target
